@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecionando...</title>
+    <script>
+      // Obtém o caminho completo (sem o nome do host)
+      var path = window.location.pathname.replace(/\/$/, '');
+
+      // Redireciona para o index.html, passando o caminho na hash
+      window.location.replace(
+        path.substring(0, path.lastIndexOf('/')) + '/index.html#' + path.slice(path.lastIndexOf('/') + 1)
+      );
+    </script>
+  </head>
+  <body>
+    <h1>Página não encontrada!</h1>
+    <p>Redirecionando...</p>
+  </body>
+</html>
