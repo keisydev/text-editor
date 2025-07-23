@@ -4,7 +4,7 @@ import './App.css'
 
 // A URL do seu servidor.
 // Se você estiver rodando em localhost, a URL é esta.
-const socket = io('http://localhost:4000');
+const socket = io('https://text-editor-ajnogijod-keisys-projects-e655d5d8.vercel.app');
 
 function App() {
   const [text, setText] = useState('')
