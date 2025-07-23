@@ -2,22 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "server/index.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "client/package.json",
       "use": "@vercel/static-build"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/socket.io/(.*)",
-      "destination": "/server/index.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/client/dist/$1"
+      "src": "server/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/socket.io/(.*)",
+      "dest": "server/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "client/dist/$1"
     }
   ]
 }
