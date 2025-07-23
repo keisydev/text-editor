@@ -2,8 +2,16 @@
 
 <br>
 
-![Badge de Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue)
-![Badge de Tecnologia](https://img.shields.io/badge/Tecnologia-JavaScript%20%7C%20React%20%7C%20Node.js-orange)
+![Badge de Status](https://img.shields.io/badge/Status-Online-green)
+![Badge de Tecnologia](https://img.shields.io/badge/Tecnologia-React%20%7C%20Node.js%20%7C%20Socket.IO-orange)
+![Badge de Deploy](https://img.shields.io/badge/Deploy-GitHub%20Pages%20%7C%20Render-blue)
+
+---
+
+## 🔗 Links do Projeto
+
+-   **Aplicação Online:** [Acesse o Editor Aqui](https://keisydev.github.io/text-editor)
+-   **API (Back-end):** [Status da API](https://text-editor-j60f.onrender.com)
 
 ---
 
@@ -18,25 +26,29 @@ O editor foi construído como um projeto de portfólio para demonstrar habilidad
 * **Front-end:**
     * **React:** Biblioteca JavaScript para construir a interface de usuário.
     * **Vite:** Ferramenta de build extremamente rápida para o ambiente de desenvolvimento.
-    * **Socket.io-client:** Biblioteca para gerenciar a comunicação em tempo real com o servidor.
+    * **gh-pages:** Biblioteca para automatizar o deploy no GitHub Pages.
 * **Back-end:**
     * **Node.js:** Ambiente de execução JavaScript.
     * **Express:** Framework para criar e gerenciar o servidor.
-    * **Socket.io:** Biblioteca para implementar WebSockets e comunicação em tempo real.
+    * **Socket.IO:** Biblioteca para implementar WebSockets e comunicação em tempo real.
+* **Deploy:**
+    * **GitHub Pages:** Hospeda o front-end estático da aplicação.
+    * **Render:** Hospeda o back-end em Node.js, permitindo a comunicação em tempo real.
 
-## 🛠️ Funcionalidades Atuais
+## 🛠️ Funcionalidades
 
 -   **Edição em Tempo Real:** O texto digitado por um usuário é instantaneamente sincronizado e visível para todos os outros usuários conectados.
 -   **Arquitetura Cliente-Servidor:** Demonstra a integração de um front-end React com um back-end Node.js.
+-   **Deploy Integrado:** O projeto é publicado em plataformas separadas, uma para o front-end estático e outra para o servidor de API, o que é uma prática comum e robusta de produção.
 
-## ⚙️ Como Rodar o Projeto
+## ⚙️ Como Rodar o Projeto Localmente
 
-Para rodar este projeto localmente, siga os passos abaixo:
+Para rodar este projeto em sua máquina, siga os passos abaixo:
 
 ### Pré-requisitos
 Certifique-se de ter o **Node.js** e o **npm** instalados.
 
-### 1. Clone o repositório
+### 1. Clone o Repositório
 ```bash
 git clone [https://github.com/keisydev/editor-colaborativo.git](https://github.com/keisydev/editor-colaborativo.git)
 cd editor-colaborativo
