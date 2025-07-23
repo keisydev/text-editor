@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import io from 'socket.io-client'
-import './App.css'
+import '../../src/App.css'
 
-// A URL do seu servidor.
-// Se você estiver rodando em localhost, a URL é esta.
 const socket = io('https://text-editor-j60f.onrender.com');
 
 function Editor() {

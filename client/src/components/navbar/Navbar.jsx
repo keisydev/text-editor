@@ -1,5 +1,3 @@
-// client/src/components/Navbar.jsx
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
@@ -7,7 +5,7 @@ const Navbar = () => {
     <nav>
       <Link to="/">Home</Link>
       <Link to="/editor">Editor</Link>
-      <Link to="/sobre">Sobre</Link>
+      <Link to="/about">Sobre</Link>
     </nav>
   );
 };
