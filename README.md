@@ -2,7 +2,7 @@
 
 <br>
 
-![Badge de Status](https://img.shields.io/badge/Status-Online-green)
+![Badge de Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue)
 ![Badge de Tecnologia](https://img.shields.io/badge/Tecnologia-React%20%7C%20Node.js%20%7C%20Socket.IO-orange)
 ![Badge de Deploy](https://img.shields.io/badge/Deploy-GitHub%20Pages%20%7C%20Render-blue)
 
