@@ -1,50 +1,21 @@
-import { useState, useEffect } from 'react'
-import io from 'socket.io-client'
-import './App.css'
-
-// A URL do seu servidor.
-// Se você estiver rodando em localhost, a URL é esta.
-const socket = io('https://text-editor-j60f.onrender.com');
+// client/src/App.jsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar'; // Componente de navegação
+import Home from './pages/Home';
+import Editor from './pages/Editor';
+import About from './pages/About';
+import './App.css'; // Estilos globais
 
 function App() {
-  const [text, setText] = useState('')
-
-  useEffect(() => {
-    // Escuta por uma conexão bem-sucedida
-    socket.on('connect', () => {
-      console.log('Conectado ao servidor! ID:', socket.id);
-    });
-
-    //Recebe o texto atualizado de outros clientes
-    socket.on('receive_message', (data) => {
-      setText(data)
-    })
-
-    return () => {
-      socket.off('connect');
-      socket.off('receive_message');
-    };
-  }, []); // O array vazio garante que o efeito rode apenas uma vez
-
-  const handleTextChange = (event) => {
-    const newText = event.target.value
-    setText(newText) //atualiza o estado
-    socket.emit('send_message', newText) //Enviar o texto para o servidor
-  }
-
-
-
   return (
-    <div className="app-container">
-      <h1>Editor Colaborativo</h1>
-      {/* Aqui é onde o seu textarea vai ficar */}
-      <textarea
-        className="editor"
-        placeholder="Comece a digitar..."
-        value={text}
-        onChange={handleTextChange}
-      />
-    </div>
+    <Router basename="/editor-colaborativo"> {/* O basename é crucial para o GitHub Pages! */}
+      <Navbar /> {/* A navbar aparece em todas as páginas */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/editor/:id" element={<Editor />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </Router>
   )
 }
 
