@@ -6,75 +6,74 @@ const socketIo = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
+// server/index.js
+// ... (imports e setup Express/HTTP) ...
+
 // Configura o Socket.IO com a configuração de CORS
 const io = socketIo(server, {
   cors: {
     origin: "*", 
     methods: ["GET", "POST"]
-  }
+  },
+  // Opcional: Força o uso de WebSockets primeiro para depuração
+  // transports: ['websocket', 'polling'] 
 });
 
-//Define a porta do servidor.
 const PORT = process.env.PORT || 4000;
 
-// Adiciona uma rota GET para a URL raiz
 app.get('/', (req, res) => {
+  console.log('GET / request received'); // Log para cada requisição GET
   res.send('Servidor do Editor de Texto Colaborativo funcionando!');
 });
 
-// Estado do servidor: agora é um objeto para gerenciar múltiplas salas
 let roomsState = {};
 
-// Configura a conexão do Socket.IO
 io.on('connection', (socket) => {
-    console.log(`Novo cliente conectado! ID: ${socket.id}`);
+    console.log(`[Socket.IO] Novo cliente conectado! ID: ${socket.id}`);
     
-    // Ouve o evento de um cliente para entrar em uma sala
     socket.on('join_room', (roomId) => {
-      socket.join(roomId); // O socket entra na sala
-      console.log(`Cliente ${socket.id} entrou na sala: ${roomId}`);
+      socket.join(roomId);
+      // Log quando um cliente entra na sala
+      console.log(`[Socket.IO] Cliente ${socket.id} entrou na sala: ${roomId}`);
       
-      // Inicializa a sala se ela não existir
       if (!roomsState[roomId]) {
           roomsState[roomId] = { text: '', charCount: 0 };
+          console.log(`[Room State] Sala ${roomId} inicializada.`);
       }
       
-      // Envia o estado atual da sala para o cliente que acabou de entrar
+      // Envia o estado ATUAL da sala para o cliente que acabou de entrar
+      console.log(`[Socket.IO] Enviando estado inicial para ${socket.id} na sala ${roomId}: ${roomsState[roomId].text.substring(0, 20)}...`);
       socket.emit('receive_message', roomsState[roomId].text);
       socket.emit('update_char_count', roomsState[roomId].charCount);
     });
 
-    // Ouve o evento de um cliente para sair de uma sala
-    socket.on('leave_room', (roomId) => {
-      socket.leave(roomId);
-      console.log(`Cliente ${socket.id} saiu da sala: ${roomId}`);
-    });
-
-    // Ouve as mensagens de texto de um cliente
     socket.on('send_message', (data, roomId) => {
-        // Atualiza o estado global da sala
+        // Log da mensagem recebida
+        console.log(`[Socket.IO] Mensagem recebida de ${socket.id} na sala ${roomId}: ${data.substring(0, 50)}...`);
         roomsState[roomId].text = data;
         
-        // Envia o novo texto para TODOS os clientes na mesma sala, EXCETO o remetente
+        // Log do broadcast
+        console.log(`[Socket.IO] Retransmitindo para sala ${roomId}: ${roomsState[roomId].text.substring(0, 50)}...`);
         socket.to(roomId).emit('receive_message', roomsState[roomId].text);
     });
 
-    // Ouve a contagem de caracteres de um cliente
     socket.on('send_char_count', (count, roomId) => {
-        // Atualiza a contagem de caracteres da sala
+        console.log(`[Socket.IO] Contagem recebida de ${socket.id} na sala ${roomId}: ${count}`);
         roomsState[roomId].charCount = count;
         
-        // Envia a nova contagem para TODOS os clientes na mesma sala, EXCETO o remetente
         socket.to(roomId).emit('update_char_count', roomsState[roomId].charCount);
     });
 
-    // Ouve a desconexão de um cliente
     socket.on('disconnect', () => {
-        console.log(`Cliente desconectado. ID: ${socket.id}`);
+        console.log(`[Socket.IO] Cliente desconectado. ID: ${socket.id}`);
+    });
+
+    // Opcional: Log para erros do Socket.IO
+    socket.on('error', (error) => {
+        console.error(`[Socket.IO Error] Erro no socket ${socket.id}:`, error);
     });
 });
 
-// Inicia o servidor para ouvir na porta configurada.
 server.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`[Server] Servidor rodando na porta ${PORT}`);
 });
