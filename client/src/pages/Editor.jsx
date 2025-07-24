@@ -1,68 +1,72 @@
-import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import io from 'socket.io-client'
-import './Editor.css'
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import io from 'socket.io-client';
+import '../../App.css';
+import './Editor.css'; 
 
 const socket = io('https://text-editor-j60f.onrender.com');
 
 function Editor() {
-    const {id} = useParams() //pega o id da url
+  const { id } = useParams(); // Pega o 'id' da URL
+  
+  const [text, setText] = useState('');
+  const [charCount, setCharCount] = useState(0);
 
-
-  const [text, setText] = useState('')
-  const [charCount, setCharCount] = useState(0)
-
+  // useEffect principal para a lógica do Socket.IO
   useEffect(() => {
-    // Escuta por uma conexão bem-sucedida
-    socket.on('connect', () => {
-      console.log('Conectado ao servidor! ID:', socket.id);
-      socket.emit('join_room', id)
+    socket.emit('join_room', id);
+    console.log(`[Frontend] Emitindo join_room para sala: ${id}`);
+
+
+    // Ouve o evento de receber mensagem
+    socket.on('receive_message', (data) => {
+      console.log(`[Frontend] Mensagem recebida: ${data.substring(0, 20)}...`);
+      setText(data);
     });
 
-    //Recebe o texto atualizado de outros clientes
-    socket.on('receive_message', (data) => {
-      setText(data)
-    })
+    // Ouve o evento de atualização da contagem de caracteres
+    socket.on('update_char_count', (count) => {
+      console.log(`[Frontend] Contagem de caracteres recebida: ${count}`);
+      setCharCount(count);
+    });
 
-    socket.on('update_char_count', (count) =>{
-      setCharCount(count)
-    })
-
+    // Limpeza: Remove os listeners quando o componente é desmontado ou ID muda
     return () => {
-      socket.emit('leave_room', id);
-      socket.off('connect')
+      console.log(`[Frontend] Limpando listeners e saindo da sala: ${id}`);
       socket.off('receive_message');
-      socket.off('update_char_count')
+      socket.off('update_char_count');
     };
-  }, [id]); // O array vazio garante que o efeito rode apenas uma vez
+  }, [id]); // O 'id' no array de dependências garante que o efeito rode se a URL (id da sala) mudar
+
 
   const handleTextChange = (event) => {
-    const newText = event.target.value
-    const newCharCount = newText.length
+    const newText = event.target.value;
+    const newCharCount = newText.length;
+    
+    setText(newText); // Atualiza o estado local IMEDIATAMENTE
+    setCharCount(newCharCount); // Atualiza o estado local IMEDIATAMENTE
 
-    setText(newText)
-    setCharCount(newCharCount)
+    // Emite as mensagens com o nome da sala
+    socket.emit('send_message', newText, id);
+    socket.emit('send_char_count', newCharCount, id);
+  };
 
-    socket.emit('send_message', newText, id)
-    socket.emit('send_char_count', newCharCount, id)
-  }
-
-
-
-   return (
-        <div className="editor-container">
-            <div className="editor-header">
-                <h1>Editor da sala: {id}</h1>
-            </div>
-            <textarea
-                className="editor-textarea"
-                // ...
-            />
-            <div className="editor-statusbar">
-                <span>Caracteres: {charCount}</span>
-            </div>
-        </div>
-    )
+  return (
+    <div className="editor-container">
+      <div className="editor-header">
+        <h1>Editor da sala: {id}</h1>
+      </div>
+      <textarea
+        className="editor-textarea"
+        placeholder="Comece a digitar..."
+        value={text} // Garante que o textarea reflita o estado 'text'
+        onChange={handleTextChange}
+      />
+      <div className="editor-statusbar">
+        <span>Caracteres: {charCount}</span>
+      </div>
+    </div>
+  );
 }
 
-export default Editor
+export default Editor;
