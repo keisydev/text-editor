@@ -6,17 +6,13 @@ const socketIo = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
-// server/index.js
-// ... (imports e setup Express/HTTP) ...
-
 // Configura o Socket.IO com a configuração de CORS
 const io = socketIo(server, {
   cors: {
     origin: "*", 
     methods: ["GET", "POST"]
   },
-  // Opcional: Força o uso de WebSockets primeiro para depuração
-  // transports: ['websocket', 'polling'] 
+   transports: ['websocket', 'polling'] 
 });
 
 const PORT = process.env.PORT || 4000;
