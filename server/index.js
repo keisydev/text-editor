@@ -1,9 +1,7 @@
-// server/index.js
-
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const Delta = require('quill-delta'); // Importe Delta aqui!
+const Delta = require('quill-delta'); 
 
 // Inicializa o aplicativo Express e o servidor HTTP
 const app = express();
@@ -21,7 +19,6 @@ const io = socketIo(server, {
 const PORT = process.env.PORT || 4000;
 
 // Adiciona uma rota GET para a URL raiz.
-// Serve como um "health check" para o servidor.
 app.get('/', (req, res) => {
   console.log('[Server] GET / request received');
   res.send('Servidor do Editor de Texto Colaborativo funcionando!');
@@ -90,7 +87,7 @@ io.on('connection', (socket) => {
         console.log(`[Socket.IO] Cliente desconectado. ID: ${socket.id}`);
     });
 
-    // Opcional: Log para erros do Socket.IO
+    //Log para erros do Socket.IO
     socket.on('error', (error) => {
         console.error(`[Socket.IO Error] Erro no socket ${socket.id}:`, error);
     });
