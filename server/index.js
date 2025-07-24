@@ -1,15 +1,12 @@
-// server/index.js
-
-// 1. Importa as bibliotecas necessárias
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 
-// 2. Inicializa o aplicativo Express e o servidor HTTP
+//  Inicializa o aplicativo Express e o servidor HTTP
 const app = express();
 const server = http.createServer(app);
 
-// 3. Configura o Socket.IO com a configuração de CORS
+// Configura o Socket.IO com a configuração de CORS
 const io = socketIo(server, {
   cors: {
     origin: "*", 
@@ -17,18 +14,18 @@ const io = socketIo(server, {
   }
 });
 
-// 4. Define a porta do servidor.
+//Define a porta do servidor.
 const PORT = process.env.PORT || 4000;
 
-// 5. Adiciona uma rota GET para a URL raiz
+// Adiciona uma rota GET para a URL raiz
 app.get('/', (req, res) => {
   res.send('Servidor do Editor de Texto Colaborativo funcionando!');
 });
 
-// 6. Estado do servidor: agora é um objeto para gerenciar múltiplas salas
+// Estado do servidor: agora é um objeto para gerenciar múltiplas salas
 let roomsState = {};
 
-// 7. Configura a conexão do Socket.IO
+// Configura a conexão do Socket.IO
 io.on('connection', (socket) => {
     console.log(`Novo cliente conectado! ID: ${socket.id}`);
     
@@ -77,7 +74,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// 8. Inicia o servidor para ouvir na porta configurada.
+// Inicia o servidor para ouvir na porta configurada.
 server.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
