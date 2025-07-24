@@ -1,3 +1,4 @@
+// client/src/pages/Editor.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
@@ -5,58 +6,98 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; 
 import '../App.css';
 import './Editor.css'; 
-
-const socket = io('https://text-editor-j60f.onrender.com'); // Sua URL do Render
+import Delta from 'quill-delta'; 
 
 function Editor() {
-  const { id } = useParams();
-  const [text, setText] = useState(''); // Estado para o conteúdo HTML/Delta do Quill
+  const { id } = useParams(); 
   const [charCount, setCharCount] = useState(0); 
   const quillRef = useRef(null); 
+  const socketRef = useRef(null); 
+  const [quillInitialized, setQuillInitialized] = useState(false); // Novo estado para controlar a inicialização do Quill
 
+  // useEffect para configurar o Socket.IO e listeners
   useEffect(() => {
-    socket.emit('join_room', id);
-    console.log(`[Frontend] Emitindo join_room para sala: ${id}`);
+    // CRÍTICO: Criar a conexão e armazenar na ref
+    const currentSocket = io('https://text-editor-j60f.onrender.com'); 
+    socketRef.current = currentSocket; 
 
-    //Ouve o evento de receber mensagem
-    socket.on('receive_message', (delta) => {
-      console.log(`[Frontend] Delta recebido do servidor:`, delta); // Log para ver o delta recebido
-      if (quillRef.current) {
+    console.log(`[Frontend] Tentando conectar e entrar na sala: ${id}`);
+    currentSocket.emit('join_room', id);
+
+    // Listener para o conteúdo INICIAL COMPLETO
+    const handleInitialDocument = (initialDelta) => {
+      console.log(`[Frontend][INITIAL] Conteúdo inicial recebido:`, initialDelta);
+      if (quillRef.current && initialDelta && typeof initialDelta === 'object' && initialDelta.ops) {
         const editor = quillRef.current.getEditor();
-        // Aplica o delta recebido no editor
-        // 'silent' evita loop infinito
-        editor.setContents(delta, 'silent'); 
+        editor.setContents(new Delta(initialDelta), 'silent'); // setContents para conteúdo COMPLETO
+        setCharCount(editor.getText().trim().length);
+        console.log(`[Frontend][INITIAL] Conteúdo inicial aplicado.`);
+      } else {
+        console.error('[Frontend][INITIAL] Conteúdo inicial inválido ou quillRef não disponível:', initialDelta);
       }
-    });
+    };
 
-    // Ouve o evento de atualização da contagem de caracteres
-    socket.on('update_char_count', (count) => {
+    // Listener para MUDANÇAS INCREMENTAIS
+    const handleTextChange = (deltaChange) => { 
+      console.log(`[Frontend][CHANGE] Mudança Delta incremental recebida:`, deltaChange);
+      if (quillRef.current && deltaChange && typeof deltaChange === 'object' && deltaChange.ops) {
+        const editor = quillRef.current.getEditor();
+        editor.updateContents(new Delta(deltaChange), 'silent'); // updateContents para MUDANÇAS
+        setCharCount(editor.getText().trim().length); 
+        console.log(`[Frontend][CHANGE] Mudança Delta aplicada.`);
+      } else {
+        console.error('[Frontend][CHANGE] Mudança Delta incremental inválida ou quillRef não disponível:', deltaChange);
+      }
+    };
+
+    const handleUpdateCharCount = (count) => {
       console.log(`[Frontend] Contagem de caracteres recebida: ${count}`);
       setCharCount(count);
-    });
-
-    // Limpeza dos listeners quando o componente é desmontado ou o ID da sala muda
-    return () => {
-      console.log(`[Frontend] Limpando listeners e saindo da sala: ${id}`);
-      socket.off('receive_message');
-      socket.off('update_char_count');
     };
-  }, [id]); // Dependência do ID da sala
 
-  // ENVIO: Função para lidar com mudanças no Quill
-  const handleQuillChange = (content, delta, source) => {
-    if (source === 'user') { 
-      setText(content); // Atualiza o estado local para garantir que o Quill reflita a digitação local
-      const currentText = quillRef.current.getEditor().getText(); // Pega o texto puro para contagem
-      const newCharCount = currentText.trim().length; 
+    currentSocket.on('initial_document', handleInitialDocument); 
+    currentSocket.on('text_change', handleTextChange);           
+    currentSocket.on('update_char_count', handleUpdateCharCount);
 
-      setCharCount(newCharCount);
+    // Função de limpeza CRÍTICA
+    return () => {
+      console.log(`[Frontend] Limpando listeners e desconectando para sala: ${id}`);
+      currentSocket.off('initial_document', handleInitialDocument);
+      currentSocket.off('text_change', handleTextChange);
+      currentSocket.off('update_char_count', handleUpdateCharCount);
+      currentSocket.emit('leave_room', id); 
+      currentSocket.disconnect(); // Desconecta o socket
+    };
+  }, [id]); 
 
-      // Emite o DELTA para o servidor
-      socket.emit('send_message', delta, id); 
-      socket.emit('send_char_count', newCharCount, id);
+  // Novo useEffect para inicializar o Quill e garantir que ele esteja pronto
+  useEffect(() => {
+    if (quillRef.current && !quillInitialized) {
+      const editor = quillRef.current.getEditor();
+      editor.setContents(new Delta([{ insert: '\n' }]), 'silent'); // Garante que começa limpo
+      setCharCount(0);
+      setQuillInitialized(true); // Marca como inicializado
+      console.log("[Frontend] Quill inicializado no DOM.");
     }
-  
+  }, [quillInitialized]); // Rode uma vez quando a ref estiver pronta e o estado for falso
+
+
+  const handleQuillChange = (content, delta, source) => {
+    if (source === 'user') {
+      if (socketRef.current && quillRef.current) { 
+        const editor = quillRef.current.getEditor();
+        const currentText = editor.getText();
+        const newCharCount = currentText.trim().length;
+
+        setCharCount(newCharCount);
+
+        socketRef.current.emit('send_message', delta, id); 
+        socketRef.current.emit('send_char_count', newCharCount, id);
+        console.log(`[Frontend] Delta ENVIADO:`, JSON.parse(JSON.stringify(delta))); 
+      } else {
+        console.warn('[Frontend] Socket ou Quill não disponível para enviar mensagem.');
+      }
+    }
   };
 
   return (
@@ -67,7 +108,6 @@ function Editor() {
       <ReactQuill
         ref={quillRef} 
         theme="snow" 
-        value={text} // O valor do editor é controlado pelo estado 'text'
         onChange={handleQuillChange} 
         modules={{
           toolbar: [

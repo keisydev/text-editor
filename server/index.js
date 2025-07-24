@@ -1,12 +1,16 @@
+// server/index.js
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const Delta = require('quill-delta'); // Importe Delta aqui!
 
-//Inicializa o aplicativo Express e o servidor HTTP
+// Inicializa o aplicativo Express e o servidor HTTP
 const app = express();
 const server = http.createServer(app);
 
 // Configura o Socket.IO com a configuração de CORS
+// Permite conexões de qualquer origem para o desenvolvimento/produção
 const io = socketIo(server, {
   cors: {
     origin: "*", 
@@ -14,18 +18,17 @@ const io = socketIo(server, {
   }
 });
 
-// Define a porta do servidor.
-//    process.env.PORT é usado em ambientes de produção (Render).
-//    A porta 4000 é a padrão para o desenvolvimento local.
 const PORT = process.env.PORT || 4000;
 
 // Adiciona uma rota GET para a URL raiz.
+// Serve como um "health check" para o servidor.
 app.get('/', (req, res) => {
-  console.log('GET / request received');
+  console.log('[Server] GET / request received');
   res.send('Servidor do Editor de Texto Colaborativo funcionando!');
 });
 
-//Estado do servidor: um objeto para gerenciar múltiplas salas.
+// Estado do servidor: agora é um objeto para gerenciar múltiplas salas.
+// O 'text' será armazenado como um objeto Delta (formato do Quill.js).
 let roomsState = {};
 
 // Configura a conexão do Socket.IO
@@ -37,16 +40,17 @@ io.on('connection', (socket) => {
       socket.join(roomId); // Faz o socket entrar na sala
       console.log(`[Socket.IO] Cliente ${socket.id} entrou na sala: ${roomId}`);
       
-      // Inicializa a sala se ela não existir
       if (!roomsState[roomId]) {
-          // O estado inicial do texto para o Quill é um Delta vazio com um caractere de nova linha
-          roomsState[roomId] = { text: { ops: [{ insert: '\n' }] }, charCount: 0 }; 
-          console.log(`[Room State] Sala ${roomId} inicializada.`);
+          // Inicializa o texto como um Delta vazio (documento vazio no Quill)
+          roomsState[roomId] = { text: new Delta([{ insert: '\n' }]), charCount: 0 }; 
+          console.log(`[Room State] Sala ${roomId} inicializada com Delta vazio.`);
       }
       
-      // Envia o estado ATUAL (Delta) da sala para o cliente que acabou de entrar
-      console.log(`[Socket.IO] Enviando estado inicial (Delta) para ${socket.id} na sala ${roomId}:`, JSON.stringify(roomsState[roomId].text).substring(0, 50));
-      socket.emit('receive_message', roomsState[roomId].text);
+      // Envia o estado ATUAL (Delta COMPLETO) da sala para o cliente que acabou de entrar
+      console.log(`[Socket.IO] Enviando Delta COMPLETO (inicial) para ${socket.id} na sala ${roomId}:`, JSON.stringify(roomsState[roomId].text).substring(0, 50) + '...');
+      socket.emit('initial_document', roomsState[roomId].text);
+      
+      // A contagem de caracteres inicial
       socket.emit('update_char_count', roomsState[roomId].charCount);
     });
 
@@ -56,15 +60,20 @@ io.on('connection', (socket) => {
       console.log(`[Socket.IO] Cliente ${socket.id} saiu da sala: ${roomId}`);
     });
 
-    // Ouve as mensagens de texto (Deltas) de um cliente
-    socket.on('send_message', (delta, roomId) => { 
-        // Log da mensagem Delta recebida
-        console.log(`[Socket.IO] Delta recebido de ${socket.id} na sala ${roomId}:`, JSON.stringify(delta).substring(0, 50));
-        roomsState[roomId].text = delta; // Armazena o Delta
+    // Ouve as mensagens de texto (Deltas de mudança) de um cliente
+    socket.on('send_message', (deltaChange, roomId) => { 
+        // Log DETALHADO do Delta de mudança recebido
+        console.log(`[Socket.IO] Delta de MUDANÇA recebido de ${socket.id} na sala ${roomId}:`, JSON.stringify(deltaChange));
         
-        // Retransmite o DELTA para TODOS os clientes na mesma sala, EXCETO o remetente
-        console.log(`[Socket.IO] Retransmitindo Delta para sala ${roomId}:`, JSON.stringify(roomsState[roomId].text).substring(0, 50));
-        socket.to(roomId).emit('receive_message', roomsState[roomId].text);
+        // Aplica a mudança Delta ao estado atual do documento (Delta completo)
+        // Certifica-se de que o roomsState[roomId].text é um objeto Delta antes de compor
+        let currentDocumentDelta = new Delta(roomsState[roomId].text);
+        currentDocumentDelta = currentDocumentDelta.compose(new Delta(deltaChange));
+        roomsState[roomId].text = currentDocumentDelta; // Armazena o novo Delta completo no estado do servidor
+        
+        // Retransmite APENAS a MUDANÇA (deltaChange) via evento 'text_change'
+        console.log(`[Socket.IO] Retransmitindo MUDANÇA Delta para sala ${roomId}:`, JSON.stringify(deltaChange).substring(0, 50) + '...');
+        socket.to(roomId).emit('text_change', deltaChange); 
     });
 
     // Ouve a contagem de caracteres de um cliente
@@ -81,7 +90,7 @@ io.on('connection', (socket) => {
         console.log(`[Socket.IO] Cliente desconectado. ID: ${socket.id}`);
     });
 
-    // Log para erros do Socket.IO
+    // Opcional: Log para erros do Socket.IO
     socket.on('error', (error) => {
         console.error(`[Socket.IO Error] Erro no socket ${socket.id}:`, error);
     });
