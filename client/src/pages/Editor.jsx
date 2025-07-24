@@ -1,3 +1,4 @@
+// client/src/pages/Editor.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
@@ -7,46 +8,45 @@ import '../App.css';
 import './Editor.css'; 
 import Delta from 'quill-delta'; 
 
-
 function Editor() {
   const { id } = useParams(); 
   const [charCount, setCharCount] = useState(0); 
   const quillRef = useRef(null); 
   const socketRef = useRef(null); 
+  const [quillInitialized, setQuillInitialized] = useState(false); // estado para controlar a inicialização do Quill
 
-  // useEffect principal para GERENCIAR A CONEXÃO E OS LISTENERS DO SOCKET.IO
+  // useEffect para configurar o Socket.IO e listeners
   useEffect(() => {
-    // Inicializa a conexão do socket apenas UMA VEZ por componente
+    // Criar a conexão e armazenar na ref
     const currentSocket = io('https://text-editor-j60f.onrender.com'); 
-    socketRef.current = currentSocket; // Armazena a instância na ref
+    socketRef.current = currentSocket; 
 
     console.log(`[Frontend] Tentando conectar e entrar na sala: ${id}`);
     currentSocket.emit('join_room', id);
 
+    // Listener para o conteúdo INICIAL COMPLETO
     const handleInitialDocument = (initialDelta) => {
-      console.log(`[Frontend][INITIAL] Conteúdo recebido:`, initialDelta);
-      if (initialDelta && typeof initialDelta === 'object' && initialDelta.ops) {
-        if (quillRef.current) {
-          const editor = quillRef.current.getEditor();
-          editor.setContents(new Delta(initialDelta), 'silent'); 
-          setCharCount(editor.getText().trim().length);
-          console.log(`[Frontend][INITIAL] Conteúdo inicial aplicado.`);
-        }
+      console.log(`[Frontend][INITIAL] Conteúdo inicial recebido:`, initialDelta);
+      if (quillRef.current && initialDelta && typeof initialDelta === 'object' && initialDelta.ops) {
+        const editor = quillRef.current.getEditor();
+        editor.setContents(new Delta(initialDelta), 'silent'); // setContents para conteúdo COMPLETO
+        setCharCount(editor.getText().trim().length);
+        console.log(`[Frontend][INITIAL] Conteúdo inicial aplicado.`);
       } else {
-        console.error('[Frontend][INITIAL] Conteúdo inicial inválido recebido:', initialDelta);
+        console.error('[Frontend][INITIAL] Conteúdo inicial inválido ou quillRef não disponível:', initialDelta);
       }
     };
 
+    // Listener para MUDANÇAS INCREMENTAIS
     const handleTextChange = (deltaChange) => { 
-      console.log(`[Frontend][CHANGE] Mudança Delta recebida:`, deltaChange);
-      if (deltaChange && typeof deltaChange === 'object' && deltaChange.ops) {
-        if (quillRef.current) {
-          const editor = quillRef.current.getEditor();
-          editor.updateContents(new Delta(deltaChange), 'silent'); 
-          console.log(`[Frontend][CHANGE] Mudança Delta aplicada.`);
-        }
+      console.log(`[Frontend][CHANGE] Mudança Delta incremental recebida:`, deltaChange);
+      if (quillRef.current && deltaChange && typeof deltaChange === 'object' && deltaChange.ops) {
+        const editor = quillRef.current.getEditor();
+        editor.updateContents(new Delta(deltaChange), 'silent'); // updateContents para MUDANÇAS
+        setCharCount(editor.getText().trim().length); 
+        console.log(`[Frontend][CHANGE] Mudança Delta aplicada.`);
       } else {
-        console.error('[Frontend][CHANGE] Mudança Delta inválida recebida:', deltaChange);
+        console.error('[Frontend][CHANGE] Mudança Delta incremental inválida ou quillRef não disponível:', deltaChange);
       }
     };
 
@@ -55,36 +55,36 @@ function Editor() {
       setCharCount(count);
     };
 
-    // Adiciona os listeners à instância atual do socket
     currentSocket.on('initial_document', handleInitialDocument); 
     currentSocket.on('text_change', handleTextChange);           
     currentSocket.on('update_char_count', handleUpdateCharCount);
 
-    // FUNÇÃO DE LIMPEZA: Desconecta e remove listeners quando o componente desmonta
+    // Função de limpeza 
     return () => {
       console.log(`[Frontend] Limpando listeners e desconectando para sala: ${id}`);
       currentSocket.off('initial_document', handleInitialDocument);
       currentSocket.off('text_change', handleTextChange);
       currentSocket.off('update_char_count', handleUpdateCharCount);
-      currentSocket.emit('leave_room', id); // Avisa o servidor que está saindo da sala
+      currentSocket.emit('leave_room', id); 
       currentSocket.disconnect(); // Desconecta o socket
     };
-  }, [id]); // Dependência do ID da sala
+  }, [id]); 
 
-
+  // useEffect para inicializar o Quill e garantir que ele esteja pronto
   useEffect(() => {
-    if (quillRef.current) {
-        const editor = quillRef.current.getEditor();
-        editor.setContents(new Delta([{ insert: '\n' }]), 'silent'); 
-        setCharCount(0); 
+    if (quillRef.current && !quillInitialized) {
+      const editor = quillRef.current.getEditor();
+      editor.setContents(new Delta([{ insert: '\n' }]), 'silent'); // Garante que começa limpo
+      setCharCount(0);
+      setQuillInitialized(true); // Marca como inicializado
+      console.log("[Frontend] Quill inicializado no DOM.");
     }
-  }, [id]);
+  }, [quillInitialized]); // Rode uma vez quando a ref estiver pronta e o estado for falso
 
 
   const handleQuillChange = (content, delta, source) => {
     if (source === 'user') {
-      // Use socketRef.current para acessar a instância do socket
-      if (socketRef.current) { 
+      if (socketRef.current && quillRef.current) { 
         const editor = quillRef.current.getEditor();
         const currentText = editor.getText();
         const newCharCount = currentText.trim().length;
@@ -93,9 +93,9 @@ function Editor() {
 
         socketRef.current.emit('send_message', delta, id); 
         socketRef.current.emit('send_char_count', newCharCount, id);
-        console.log(`[Frontend] Delta ENVIADO:`, JSON.parse(JSON.stringify(delta))); // Log do Delta com JSON.parse/stringify
+        console.log(`[Frontend] Delta ENVIADO:`, JSON.parse(JSON.stringify(delta))); 
       } else {
-        console.warn('[Frontend] Socket não disponível para enviar mensagem.');
+        console.warn('[Frontend] Socket ou Quill não disponível para enviar mensagem.');
       }
     }
   };
