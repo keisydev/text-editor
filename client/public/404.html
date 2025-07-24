@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecionando para o Quill...</title>
+    <script>
+      // Extrai o caminho completo da URL atual
+      var currentPath = window.location.pathname;
+      var currentSearch = window.location.search;
+      var currentHash = window.location.hash;
+
+      // Define o nome base do seu repositório (com a barra inicial e final, se aplicável)
+      var repoBase = "/text-editor/"; // <<-- Seu repositório AQUI!
+
+      // Remove o base do repositório do caminho
+      // Ex: /text-editor/editor/sala123 -> /editor/sala123
+      var cleanPath = currentPath.startsWith(repoBase) ? currentPath.substring(repoBase.length - 1) : currentPath; // -1 para manter a barra inicial
+
+      // Constrói a nova URL com a rota na hash
+      var newUrl = window.location.origin + repoBase + 'index.html#' + cleanPath + currentSearch + currentHash;
+
+      // Redireciona o navegador
+      window.location.replace(newUrl);
+    </script>
+  </head>
+  <body>
+    <h1>Página não encontrada!</h1>
+    <p>Redirecionando para a sala colaborativa...</p>
+  </body>
+</html>
