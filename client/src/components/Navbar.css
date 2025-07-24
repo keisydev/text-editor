@@ -1,0 +1,27 @@
+nav {
+  background-color: var(--dark-background-color); /* Fundo escuro */
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between; /* Espaçamento entre itens */
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+nav .logo {
+  color: var(--secondary-color); /* Cor do logo */
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+nav .nav-links a {
+  color: var(--light-text-color); /* Cor dos links */
+  text-decoration: none;
+  margin-left: 25px;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+nav .nav-links a:hover {
+  color: var(--secondary-color); /* Cor no hover */
+}

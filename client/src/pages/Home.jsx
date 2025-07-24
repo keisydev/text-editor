@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CreateQuillModal from '../components/CreateQuillModal';
+import './Home.css'
 
 const Home = () => {
-  const [roomName, setRoomName] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleCreatePad = () => {
-    if (roomName.trim() !== '') {
-      // Redireciona o usuário para a URL do editor com o nome da sala
-      navigate(`/editor/${roomName}`);
-    }
+  const handleCreateQuill = (quillName) => {
+    setIsModalOpen(false); // Fecha o modal
+    navigate(`/editor/${quillName}`); // Redireciona para o novo quill
   };
 
   return (
-    <div>
-      <h1>Bem-vindo ao Editor Colaborativo!</h1>
-      <p>Crie um novo pad público para começar a colaborar.</p>
-      <div>
-        <input
-          type="text"
-          placeholder="Nome do novo pad"
-          value={roomName}
-          onChange={(e) => setRoomName(e.target.value)}
+    <div className="home-container">
+      <h1>Bem-vindo ao Quill Colaborativo!</h1>
+      <p>Sua plataforma para notas e documentos em tempo real.</p>
+      
+      <button 
+        className="create-button"
+        onClick={() => setIsModalOpen(true)}
+      >
+        Criar um novo Quill
+      </button>
+
+      {isModalOpen && (
+        <CreateQuillModal
+          onClose={() => setIsModalOpen(false)}
+          onCreate={handleCreateQuill}
         />
-        <button onClick={handleCreatePad}>Criar Pad</button>
-      </div>
+      )}
     </div>
   );
 };

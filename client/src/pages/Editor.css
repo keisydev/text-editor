@@ -1,0 +1,39 @@
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+}
+
+.editor-header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.editor-textarea {
+  flex-grow: 1; /* Ocupa o espaço restante */
+  width: 100%;
+  padding: 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-family: 'Consolas', 'Monaco', monospace; /* Fonte monoespaçada */
+  font-size: 1rem;
+  resize: none; /* Impede que o usuário redimensione */
+  outline: none; /* Remove o contorno ao focar */
+}
+
+.editor-statusbar {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* Estilos para telas maiores (desktop) */
+@media (min-width: 768px) {
+  .editor-header h1 {
+    font-size: 2.2rem;
+  }
+  .editor-textarea {
+    font-size: 1.1rem;
+  }
+}

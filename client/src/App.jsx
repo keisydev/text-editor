@@ -1,6 +1,6 @@
 // client/src/App.jsx
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/navbar/Navbar'; // Componente de navegação
+import Navbar from './components/Navbar'; // Componente de navegação
 import Home from './pages/Home';
 import Editor from './pages/Editor';
 import About from './pages/About';

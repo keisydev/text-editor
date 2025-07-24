@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import io from 'socket.io-client'
-import '../../src/App.css'
+import './Editor.css'
 
 const socket = io('https://text-editor-j60f.onrender.com');
 
@@ -49,21 +49,20 @@ function Editor() {
 
 
 
-  return (
-    <div className="app-container">
-      <h1>Editor da sala: {id}</h1>
-      <textarea
-        className="editor"
-        placeholder="Comece a digitar..."
-        value={text}
-        onChange={handleTextChange}
-      />
-      <div className='status-bar'>
-        <span>Caracteres: {charCount}</span>
-
-      </div>
-    </div>
-  )
+   return (
+        <div className="editor-container">
+            <div className="editor-header">
+                <h1>Editor da sala: {id}</h1>
+            </div>
+            <textarea
+                className="editor-textarea"
+                // ...
+            />
+            <div className="editor-statusbar">
+                <span>Caracteres: {charCount}</span>
+            </div>
+        </div>
+    )
 }
 
 export default Editor
