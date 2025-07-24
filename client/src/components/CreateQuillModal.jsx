@@ -11,7 +11,7 @@ const CreateQuillModal = ({ onClose, onCreate }) => {
     if (quillName.trim() !== '') {
       // Gera o link ANTES de chamar onCreate
       const baseUrl = window.location.origin + '/text-editor'; // Base GitHub Pages
-      const link = `${baseUrl}/editor/${quillName}`;
+      const link = `${baseUrl}/#/editor/${quillName}`;
       setGeneratedLink(link); // Armazena o link no estado
     }
   };
