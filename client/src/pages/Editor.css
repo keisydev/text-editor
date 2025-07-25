@@ -12,9 +12,23 @@
 
 .editor-header h1 {
   font-size: 1.8rem;
-  margin-bottom: 15px;
+  margin-bottom: 0;
   color: var(--primary-color);
   text-align: center;
+}
+
+.export-button {
+  background-color: var(--secondary-color); /* Usando o azul para o botão de exportar */
+  color: var(--light-text-color);
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.export-button:hover {
+  background-color: #4b9ae2; /* Uma versão mais escura do azul */
 }
 
 /* Estilos específicos para o Quill */
@@ -22,6 +36,7 @@
   flex-grow: 1;
   display: flex; /* Para fazer o editor e a barra de ferramentas se ajustarem */
   flex-direction: column;
+  min-height: 300px;
 }
 
 .ql-toolbar {

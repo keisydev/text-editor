@@ -1,4 +1,3 @@
-// client/src/pages/Editor.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
@@ -7,6 +6,9 @@ import 'react-quill/dist/quill.snow.css';
 import '../App.css';
 import './Editor.css'; 
 import Delta from 'quill-delta'; 
+
+import jsPDF from 'jspdf'; 
+import html2canvas from 'html2canvas'; 
 
 function Editor() {
   const { id } = useParams(); 
@@ -79,7 +81,7 @@ function Editor() {
       setQuillInitialized(true); // Marca como inicializado
       console.log("[Frontend] Quill inicializado no DOM.");
     }
-  }, [quillInitialized]); // Rode uma vez quando a ref estiver pronta e o estado for falso
+  }, [quillInitialized]); 
 
 
   const handleQuillChange = (content, delta, source) => {
@@ -100,10 +102,53 @@ function Editor() {
     }
   };
 
+  // Nova função para exportar para PDF
+  const exportToPdf = () => {
+    if (quillRef.current) {
+      // Pega o elemento DOM do editor Quill. É o que html2canvas vai renderizar.
+      const editorElement = quillRef.current.editor.scroll.domNode; 
+      
+      html2canvas(editorElement, {
+        scale: 2, // Aumenta a escala para melhor qualidade de imagem
+        useCORS: true // Essencial se houver imagens de outras origens no editor
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' para retrato, 'mm' para unidades, 'a4' para tamanho
+
+        const imgWidth = pdf.internal.pageSize.getWidth(); // Largura da página PDF
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Altura da imagem proporcional à largura da página
+
+        let heightLeft = imgHeight;
+        let position = 0; // Posição Y atual no PDF
+
+        // Adiciona a primeira página
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+
+        // Lida com múltiplas páginas se o conteúdo for maior que uma A4
+        while (heightLeft >= -1) { // -1 para garantir que pequenas sobras sejam incluídas
+          position = heightLeft - imgHeight; // Calcula a nova posição Y para o restante da imagem
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pdf.internal.pageSize.getHeight();
+        }
+        
+        pdf.save(`${id}.pdf`); // Salva o arquivo com o nome da sala atual
+      }).catch(error => {
+        console.error("Erro ao gerar PDF:", error);
+        alert("Erro ao gerar PDF. Verifique o console.");
+      });
+    } else {
+      alert("Editor não está pronto para exportar.");
+    }
+  };
+
+
   return (
     <div className="editor-container">
       <div className="editor-header">
         <h1>Editor da sala: {id}</h1>
+        <button onClick={exportToPdf} className="export-button">Exportar para PDF</button> {/* Botão de exportar */}
       </div>
       <ReactQuill
         ref={quillRef} 
