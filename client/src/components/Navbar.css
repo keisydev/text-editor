@@ -6,8 +6,14 @@ nav {
   align-items: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
+nav .title{
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
 
 nav .logo {
+  margin: 5px;
   color: var(--secondary-color); /* Cor do logo */
   font-size: 1.8rem;
   font-weight: bold;

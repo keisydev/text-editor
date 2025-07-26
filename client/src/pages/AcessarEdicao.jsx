@@ -1,5 +1,5 @@
-// client/src/pages/AcessarEdicao.jsx
-import React, { useState } from 'react';
+
+import{ useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importe useNavigate
 import '../App.css'; // Importa estilos globais
 import './AcessarEdicao.css'; // Novo CSS para esta página
@@ -10,20 +10,20 @@ const AcessarEdicao = () => {
 
   const handleAccessRoom = () => {
     if (inputRoomName.trim() !== '') {
-      // Opcional: Regex para extrair ID de uma URL completa se o usuário colar
+      
       let finalRoomName = inputRoomName.trim();
       try {
         const url = new URL(finalRoomName);
-        if (url.pathname.includes('/edicao/')) { // Altere de /editor/ para /edicao/
+        if (url.pathname.includes('/editor/')) { // Altere de /editor/ para /edicao/
           const parts = url.pathname.split('/editor/');
           if (parts.length > 1) {
-            finalRoomName = parts[1]; // Pega a parte após /edicao/
+            finalRoomName = parts[1]; // Pega a parte após /editor/
           }
         }
       } catch (e) {
         // Não é uma URL válida, continua com o texto puro
       }
-      navigate(`/edi/${finalRoomName}`); // Redireciona para a URL da sala
+      navigate(`/editor/${finalRoomName}`); // Redireciona para a URL da sala
     }
   };
 

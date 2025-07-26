@@ -108,27 +108,6 @@ justify-content: center;
     fill: var(--primary-color);
 }
 
-.ql-font-roboto {
-  font-family: 'Roboto', sans-serif;
-}
-.ql-font-open-sans {
-  font-family: 'Open Sans', sans-serif;
-}
-.ql-font-arial {
-  font-family: Arial, sans-serif;
-}
-.ql-font-verdana {
-  font-family: Verdana, sans-serif;
-}
-.ql-font-georgia {
-  font-family: Georgia, serif;
-}
-.ql-font-monospace { /* Para fonte monoespaçada, como Courier New */
-  font-family: 'Courier New', Courier, monospace;
-}
-.ql-font-times-new-roman { 
-  font-family: 'Times New Roman', serif;
-}
 
 .editor-statusbar {
   margin-top: 10px;
