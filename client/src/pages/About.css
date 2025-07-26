@@ -1,0 +1,48 @@
+/* client/src/pages/About.css */
+
+.about-container {
+  padding: 30px; /* Um padding maior para o conteúdo da página */
+  line-height: 1.8;
+  max-width: 900px; /* Limita a largura para melhor legibilidade */
+  margin: 0 auto; /* Centraliza o conteúdo */
+}
+
+.about-container h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.about-container h2 {
+  font-size: 1.8rem;
+  color: var(--secondary-color);
+  margin-top: 30px;
+  margin-bottom: 20px;
+  text-align: center; /* Centraliza subtítulos também */
+}
+
+.about-container p {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  text-align: justify; /* Texto justificado para parágrafos */
+}
+
+/* Removendo estilos para listas de tecnologias se não houver mais */
+/* .about-container ul, .technologies-grid, .tech-category não são mais necessários se não houver listas */
+
+/* Estilos Responsivos */
+@media (max-width: 768px) {
+  .about-container h1 {
+    font-size: 2rem;
+  }
+  .about-container h2 {
+    font-size: 1.5rem;
+  }
+  .about-container p {
+    font-size: 0.95rem;
+  }
+  .about-container {
+    padding: 15px; /* Reduz padding em telas pequenas */
+  }
+}

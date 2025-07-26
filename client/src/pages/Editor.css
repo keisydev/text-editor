@@ -12,9 +12,22 @@
 
 .editor-header h1 {
   font-size: 1.8rem;
-  margin-bottom: 0;
   color: var(--primary-color);
   text-align: center;
+
+  
+}
+
+.loading-editor {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  min-height: 300px;
+  font-size: 1.2rem;
+  color: #777;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
 }
 
 .export-button {
@@ -31,6 +44,11 @@
   background-color: #4b9ae2; /* Uma versão mais escura do azul */
 }
 
+.button{
+display: flex;
+justify-content: center;
+
+}
 /* Estilos específicos para o Quill */
 .quill {
   flex-grow: 1;
@@ -39,11 +57,20 @@
   min-height: 300px;
 }
 
+.ql-editor {
+  min-height: 300px; /* Garante altura mínima visível */
+  padding: 30px 40px !important;
+  line-height: 1.6; /* Melhora a legibilidade */
+  font-size: 1.1rem; /* Aumenta um pouco o tamanho da fonte para o conteúdo */
+}
+
 .ql-toolbar {
   border-bottom: 1px solid var(--border-color) !important;
   background-color: var(--background-color);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+  padding: 10px;
+  background-color: #ebe9e9;
 }
 
 .ql-container {
@@ -81,6 +108,27 @@
     fill: var(--primary-color);
 }
 
+.ql-font-roboto {
+  font-family: 'Roboto', sans-serif;
+}
+.ql-font-open-sans {
+  font-family: 'Open Sans', sans-serif;
+}
+.ql-font-arial {
+  font-family: Arial, sans-serif;
+}
+.ql-font-verdana {
+  font-family: Verdana, sans-serif;
+}
+.ql-font-georgia {
+  font-family: Georgia, serif;
+}
+.ql-font-monospace { /* Para fonte monoespaçada, como Courier New */
+  font-family: 'Courier New', Courier, monospace;
+}
+.ql-font-times-new-roman { 
+  font-family: 'Times New Roman', serif;
+}
 
 .editor-statusbar {
   margin-top: 10px;

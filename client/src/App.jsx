@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'; // Componente de navegação
 import Home from './pages/Home';
 import Editor from './pages/Editor';
 import About from './pages/About';
+import AcessarEdicao from './pages/AcessarEdicao';
 import '../../client/src/App.css'; // Estilos globais
 
 function App() {
@@ -12,6 +13,8 @@ function App() {
       <Navbar /> 
       <Routes>
         <Route path="/" element={<Home />} />
+        {/* Rota para acessar uma sala existente */}
+        <Route path="/editor" element={<AcessarEdicao />} /> 
         <Route path="/editor/:id" element={<Editor />} />
         <Route path="/about" element={<About />} />
       </Routes>
