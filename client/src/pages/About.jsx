@@ -1,6 +1,5 @@
-// client/src/pages/About.jsx
-import '../App.css'; // Importa estilos globais
-import './About.css'; // CSS específico para a página About
+import '../App.css'; 
+import './About.css'; 
 
 const About = () => {
   return (

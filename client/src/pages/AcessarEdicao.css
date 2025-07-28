@@ -1,5 +1,3 @@
-/* client/src/pages/AcessarEdicao.css */
-
 .access-room-form {
   display: flex;
   flex-direction: column;
@@ -36,13 +34,20 @@
   padding: 12px 25px;
   font-size: 1.2rem;
   border-radius: 8px;
-  background-color: var(--secondary-color); /* Usa a cor secundária */
+  background-color: var(--secondary-color); 
   color: var(--light-text-color);
   transition: background-color 0.3s ease;
 }
 
 .access-room-form button:hover {
-  background-color: #4b9ae2; /* Versão mais escura do azul */
+  background-color: #4b9ae2; 
+}
+
+.error-message {
+  color: #d9534f; 
+  margin-top: 15px;
+  font-size: 0.95rem;
+  font-weight: bold;
 }
 
 /* Ajustes responsivos para o formulário */

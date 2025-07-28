@@ -91,3 +91,21 @@
   background-color: darken(var(--secondary-color), 10%); /* Escurece o azul no hover */
   background-color: #4b9ae2; 
 }
+
+.error-message {
+  color: #d9534f; 
+  margin-top: 15px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.modal-actions button {
+  min-width: 100px;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+}
+
+.modal-actions button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

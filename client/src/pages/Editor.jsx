@@ -6,40 +6,31 @@ import 'react-quill/dist/quill.snow.css';
 import '../App.css'; 
 import './Editor.css'; 
 import Delta from 'quill-delta'; 
-import Quill from 'quill';
 
 import jsPDF from 'jspdf'; 
 import html2canvas from 'html2canvas'; 
 
 const socket = io('https://text-editor-j60f.onrender.com'); 
 
-
 function Editor() {
-  const { id } = useParams(); // Pega o ID da sala da URL
-  
+  const { id } = useParams(); 
   const [charCount, setCharCount] = useState(0); 
   const quillRef = useRef(null); 
   const socketRef = useRef(null); 
-  const [quillInitialized, setQuillInitialized] = useState(false); 
+  const [quillEditorInstanceReady, setQuillEditorInstanceReady] = useState(false); 
+  const [initialDeltaReceived, setInitialDeltaReceived] = useState(null); 
 
-  // useEffect para configurar o Socket.IO e listeners
+  // useEffect principal para configurar o Socket.IO e seus listeners
+  // Este useEffect AGORA ASSUME que 'id' sempre estará presente
   useEffect(() => {
-    const currentSocket = io('https://text-editor-j60f.onrender.com'); 
-    socketRef.current = currentSocket; 
+    socketRef.current = socket; 
 
     console.log(`[Frontend] Tentando conectar e entrar na sala: ${id}`);
-    currentSocket.emit('join_room', id);
+    socketRef.current.emit('join_room', id);
 
     const handleInitialDocument = (initialDelta) => {
       console.log(`[Frontend][INITIAL] Conteúdo inicial recebido:`, initialDelta);
-      if (quillRef.current && initialDelta && typeof initialDelta === 'object' && initialDelta.ops) {
-        const editor = quillRef.current.getEditor();
-        editor.setContents(new Delta(initialDelta), 'silent'); 
-        setCharCount(editor.getText().trim().length);
-        console.log(`[Frontend][INITIAL] Conteúdo inicial aplicado.`);
-      } else {
-        console.error('[Frontend][INITIAL] Conteúdo inicial inválido ou quillRef não disponível:', initialDelta);
-      }
+      setInitialDeltaReceived(initialDelta); 
     };
 
     const handleTextChange = (deltaChange) => { 
@@ -59,37 +50,50 @@ function Editor() {
       setCharCount(count);
     };
 
-    currentSocket.on('initial_document', handleInitialDocument); 
-    currentSocket.on('text_change', handleTextChange);           
-    currentSocket.on('update_char_count', handleUpdateCharCount);
+    socketRef.current.on('initial_document', handleInitialDocument); 
+    socketRef.current.on('text_change', handleTextChange);           
+    socketRef.current.on('update_char_count', handleUpdateCharCount);
 
     return () => {
-      console.log(`[Frontend] Limpando listeners e desconectando para sala: ${id}`);
-      currentSocket.off('initial_document', handleInitialDocument);
-      currentSocket.off('text_change', handleTextChange);
-      currentSocket.off('update_char_count', handleUpdateCharCount);
-      currentSocket.emit('leave_room', id); 
-      currentSocket.disconnect(); 
+      console.log(`[Frontend] Limpando listeners e emitindo leave_room para sala: ${id}`);
+      socketRef.current.off('initial_document', handleInitialDocument);
+      socketRef.current.off('text_change', handleTextChange);
+      socketRef.current.off('update_char_count', handleUpdateCharCount);
+      socketRef.current.emit('leave_room', id); 
     };
   }, [id]); 
 
-  // useEffect para inicializar o Quill (roda apenas se houver ID e não inicializado)
+
+  // NOVO useEffect para detectar quando a instância do editor Quill está pronta e inicializá-la
   useEffect(() => {
-    if (quillRef.current && !quillInitialized) {
+    // Isso é disparado quando quillRef.current (o componente ReactQuill) está montado
+    // E quando quillRef.current.getEditor() (a instância Quill subjacente) está disponível.
+    if (quillRef.current && quillRef.current.getEditor() && !quillEditorInstanceReady) {
       const editor = quillRef.current.getEditor();
-      editor.setContents(new Delta([{ insert: '\n' }]), 'silent'); 
+      editor.setContents(new Delta([{ insert: '\n' }]), 'silent'); // Garante que começa limpo
       setCharCount(0);
-      setQuillInitialized(true); 
-      console.log("[Frontend] Quill inicializado no DOM.");
+      setQuillEditorInstanceReady(true); // Marca que a instância do editor Quill está pronta
+      console.log("[Frontend] Instância do editor Quill totalmente inicializada e pronta.");
     }
-    
-  }, [quillInitialized]); 
+  }, [quillRef.current, quillEditorInstanceReady]); // Depende da ref e do estado
 
 
-  const handleQuillChange = ( delta, source) => {
-    // Não precisa mais do `!id` aqui, pois o componente só roda com ID
-    if (source === 'user') {
-      if (socketRef.current && quillRef.current) { 
+  // useEffect para aplicar o Delta inicial APENAS QUANDO o Quill estiver TOTALMENTE pronto E o Delta foi recebido
+  useEffect(() => {
+    if (quillEditorInstanceReady && initialDeltaReceived) { // Usa o NOVO ESTADO AQUI
+      const editor = quillRef.current.getEditor();
+      editor.setContents(new Delta(initialDeltaReceived), 'silent'); 
+      setCharCount(editor.getText().trim().length);
+      console.log("[Frontend] Conteúdo inicial (armazenado) aplicado ao Quill.");
+      setInitialDeltaReceived(null); 
+    }
+  }, [initialDeltaReceived, quillEditorInstanceReady]); // Depende do Delta, e da prontidão da instância do editor
+
+
+  const handleQuillChange = (content, delta, source) => { 
+    // Só envia se a instância do editor estiver pronta e a mudança veio do usuário
+    if (source === 'user' && id && socketRef.current && socketRef.current.connected && quillEditorInstanceReady) { 
+      if (quillRef.current) { 
         const editor = quillRef.current.getEditor();
         const currentText = editor.getText();
         const newCharCount = currentText.trim().length;
@@ -100,14 +104,16 @@ function Editor() {
         socketRef.current.emit('send_char_count', newCharCount, id);
         console.log(`[Frontend] Delta ENVIADO:`, JSON.parse(JSON.stringify(delta))); 
       } else {
-        console.warn('[Frontend] Socket ou Quill não disponível para enviar mensagem.');
+        console.warn('[Frontend] Quill (ref) não disponível para enviar mensagem.');
       }
+    } else if (source === 'user' && (!socketRef.current || !socketRef.current.connected)) {
+        console.warn('[Frontend] Socket não conectado para enviar mensagem.');
     }
   };
 
-  // Função para exportar para PDF (agora simplificada sem a verificação 'id')
   const exportToPdf = () => {
-    if (quillRef.current) {
+    // Só exporta se a instância do editor estiver pronta
+    if (quillRef.current && quillEditorInstanceReady && id) { 
       const editorElement = quillRef.current.editor.scroll.domNode; 
       
       html2canvas(editorElement, {
@@ -139,7 +145,7 @@ function Editor() {
         alert("Erro ao gerar PDF. Verifique o console.");
       });
     } else {
-      alert("Editor não está pronto para exportar.");
+      alert("Editor não está pronto ou sala não selecionada para exportar.");
     }
   };
 
@@ -149,6 +155,8 @@ function Editor() {
       <div className="editor-header">
         <h1>Editor da sala: {id}</h1>
       </div>
+      <div id="toolbar-container"></div> {/* Div para o Quill anexar a toolbar */}
+      {/* O ReactQuill SEMPRE renderiza para que a ref possa ser populada e o useEffect possa detectar */}
       <ReactQuill
         ref={quillRef} 
         theme="snow" 
@@ -156,9 +164,7 @@ function Editor() {
         modules={{
           toolbar: [
             [{ 'header': [1, 2, false] }], // Títulos (H1, H2, Normal)
-            // Seletores de Fonte 
-            [{ 'font': [] }],
-
+            [{ 'font': [] }], 
             ['bold', 'italic', 'underline', 'strike', 'blockquote'],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             [{ 'indent': '-1' }, { 'indent': '+1' }],
@@ -168,10 +174,16 @@ function Editor() {
           ],
         }}
       />
+      {/* A mensagem de carregamento é exibida POR CIMA DO EDITOR se não estiver pronto */}
+      {!quillEditorInstanceReady && (
+        <div className="loading-overlay">
+          <div className="loading-editor">Carregando editor...</div>
+        </div>
+      )}
       <div className="editor-statusbar">
         <span>Caracteres: {charCount}</span>
       </div>
-      <div className='button'><button onClick={exportToPdf} className="export-button">Exportar para PDF</button> {/* Botão de exportar */}</div>
+      <div className='button'><button onClick={exportToPdf} className="export-button">Exportar para PDF</button> </div>
     </div>
   );
 }
