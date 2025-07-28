@@ -49,6 +49,21 @@ display: flex;
 justify-content: center;
 
 }
+
+.delete-button {
+  background-color: #dc3545; 
+  color: var(--light-text-color);
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none; 
+}
+
+.delete-button:hover {
+  background-color: #c82333; 
+}
 /* Estilos específicos para o Quill */
 .quill {
   flex-grow: 1;

@@ -19,7 +19,7 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 4000;
 
-const MONGODB_URI = 'mongodb+srv://keisydev:<pdbp0LrHrf9evyto>@myquill-cluster.zwneduf.mongodb.net/?retryWrites=true&w=majority&appName=myquill-cluster'; 
+const MONGODB_URI = 'mongodb+srv://keisydev:pdbp0LrHrf9evyto@myquill-cluster.zwneduf.mongodb.net/?retryWrites=true&w=majority&appName=myquill-cluster'; 
 
 
 // *** CONECTAR AO MONGODB ***

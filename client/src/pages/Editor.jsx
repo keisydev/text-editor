@@ -90,7 +90,7 @@ function Editor() {
   }, [initialDeltaReceived, quillEditorInstanceReady]); // Depende do Delta, e da prontidão da instância do editor
 
 
-  const handleQuillChange = (content, delta, source) => { 
+  const handleQuillChange = ( delta, source) => { 
     // Só envia se a instância do editor estiver pronta e a mudança veio do usuário
     if (source === 'user' && id && socketRef.current && socketRef.current.connected && quillEditorInstanceReady) { 
       if (quillRef.current) { 
