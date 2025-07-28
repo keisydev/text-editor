@@ -50,7 +50,7 @@ const AcessarEdicao = () => {
         const data = await response.json();
 
         if (data.exists) {
-            navigate(`/edicao/${extractedRoomId}`); // Redireciona se a sala existe
+            navigate(`/editor/${extractedRoomId}`); // Redireciona se a sala existe
         } else {
             setError(`A sala '${extractedRoomId}' não foi encontrada.`);
         }

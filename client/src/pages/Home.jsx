@@ -6,7 +6,6 @@ import './Home.css'
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Função que será passada para o modal, para lidar com a criação e validação
   const handleCreateQuill = async (quillName) => { 
     const renderApiBaseUrl = 'https://text-editor-j60f.onrender.com'; 
     
@@ -17,11 +16,11 @@ const Home = () => {
         if (data.exists) {
             return { error: `O Quill '${quillName}' já existe. Por favor, escolha outro nome ou acesse-o.` };
         } else {
-            setIsModalOpen(false); 
+            // *** MUDANÇA AQUI: Retorna o link para o modal ***
             const baseUrl = window.location.origin + '/text-editor'; 
             const editorUrl = `${baseUrl}/#/edicao/${quillName}`;
-            window.open(editorUrl, '_blank'); 
-            return { success: true }; 
+            // Não abre a aba aqui. O modal fará isso depois que o link for gerado.
+            return { success: true, link: editorUrl }; // Retorna o link
         }
     } catch (apiError) {
         console.error("Erro ao verificar existência do Quill:", apiError);

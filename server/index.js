@@ -27,7 +27,7 @@ const io = socketIo(server, {
 const PORT = process.env.PORT || 4000;
 
 // Rota principal para verificar se o servidor está online
-app.get('/', (req, res) => {
+app.get('/', (res) => {
   console.log('[Server] GET / request received');
   res.send('Servidor do Editor de Texto Colaborativo funcionando!');
 });

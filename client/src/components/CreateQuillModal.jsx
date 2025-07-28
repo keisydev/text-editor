@@ -1,3 +1,4 @@
+// client/src/components/CreateQuillModal.jsx
 import React, { useState } from 'react';
 import './CreateQuillModal.css'; 
 
@@ -5,35 +6,30 @@ const CreateQuillModal = ({ onClose, onCreate }) => {
   const [quillName, setQuillName] = useState('');
   const [duration, setDuration] = useState('um mês'); 
   const [generatedLink, setGeneratedLink] = useState(''); 
-  const [error, setError] = useState(''); // Novo estado para mensagens de erro no modal
-  const [loadingSuggestion, setLoadingSuggestion] = useState(false); // Declaração correta do estado
+  const [error, setError] = useState(''); 
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false); 
 
   const handleCreate = async () => { 
-    setError(''); // Limpa erros anteriores
+    setError(''); 
     if (quillName.trim() === '') {
       setError('Por favor, digite um nome para o Quill.');
       return;
     }
 
-    // Chama a função onCreate (que agora verifica no back-end)
-    const result = await onCreate(quillName); // Espera o resultado da Promise
+    const result = await onCreate(quillName); 
 
     if (result && result.error) {
-      setError(result.error); // Exibe o erro vindo da Home
-    } else if (result && result.success) {
-      // Se a criação foi um sucesso e já redirecionou, podemos apenas fechar o modal ou deixá-lo no estado de link gerado
-      // Como o handleCreateQuill na Home já abre a aba e fecha o modal,
-      // podemos apenas gerar o link aqui se quisermos que ele continue no modal
-      const baseUrl = window.location.origin + '/text-editor'; 
-      const link = `${baseUrl}/#/edicao/${quillName}`; // <<-- Use '/edicao/' conforme suas rotas
-      setGeneratedLink(link); // Armazena o link para exibição
-      // Não fecha o modal aqui, permite que o usuário veja o link ou acesse.
+      setError(result.error); 
+      setGeneratedLink(''); // Garante que a tela de link não apareça no erro
+    } else if (result && result.success && result.link) { // *** MUDANÇA AQUI: Verifica 'result.link' ***
+      setGeneratedLink(result.link); // <<-- Usa o link retornado pela Home
+      // Nao chama onClose aqui ainda, permite que o usuario veja o link
     }
   };
 
   const handleAccessQuill = () => {
       window.open(generatedLink, '_blank'); 
-      onClose(); 
+      onClose(); // Fecha o modal depois de abrir a aba
   };
 
   const handleCopyLink = () => {
@@ -41,17 +37,17 @@ const CreateQuillModal = ({ onClose, onCreate }) => {
       alert('Link copiado para a área de transferência!'); 
   };
 
-  // Sugerir nome 
   const handleSuggestName = async () => {
-    setLoadingSuggestion(true); // <<-- Usando o nome correto aqui
-    setError(''); // Limpa o erro ao tentar sugerir
-    const renderApiBaseUrl = 'https://text-editor-j60f.onrender.com'; // Sua URL base do Render
+    setLoadingSuggestion(true);
+    setError(''); 
+    const renderApiBaseUrl = 'https://text-editor-j60f.onrender.com'; 
     try {
         const response = await fetch(`${renderApiBaseUrl}/api/suggest-room-name/${quillName.trim() || 'novo-quill'}`);
         const data = await response.json();
         if (data.suggestedName) {
-            setQuillName(data.suggestedName); // Atualiza o input com o nome sugerido
-            setError('Nome sugerido. Tente criar novamente.'); // Informa o usuário
+            setQuillName(data.suggestedName); 
+            setError('Nome sugerido. Tente criar novamente.'); 
+            setGeneratedLink(''); // Garante que não esteja mostrando um link antigo
         } else {
             setError('Não foi possível gerar uma sugestão de nome.');
         }
@@ -59,7 +55,7 @@ const CreateQuillModal = ({ onClose, onCreate }) => {
         console.error("Erro ao sugerir nome:", apiError);
         setError("Erro ao sugerir nome. Verifique a conexão.");
     } finally {
-        setLoadingSuggestion(false); // <<-- Usando o nome correto aqui
+        setLoadingSuggestion(false);
     }
   };
 
@@ -75,7 +71,7 @@ const CreateQuillModal = ({ onClose, onCreate }) => {
                 type="text"
                 placeholder="Nome único"
                 value={quillName}
-                onChange={(e) => { setQuillName(e.target.value); setError(''); }} // Limpa erro ao digitar
+                onChange={(e) => { setQuillName(e.target.value); setError(''); }} 
               />
             </div>
             <div className="form-group">
@@ -89,9 +85,9 @@ const CreateQuillModal = ({ onClose, onCreate }) => {
             {error && <p className="error-message">{error}</p>} 
             <div className="modal-actions">
               <button onClick={onClose}>Cancelar</button>
-              {error.includes('já existe') && ( // Mostra o botão de sugestão apenas se o erro for de nome existente
-                // *** CORREÇÃO FINAL AQUI: loadingSuggestion ***
-                <button onClick={handleSuggestName} disabled={loadingSuggestion}> 
+              {/* O botão de sugestão aparece se houver erro E o erro contiver a frase específica */}
+              {error && error.includes('já existe') && ( 
+                <button onClick={handleSuggestName} disabled={loadingSuggestion}>
                   {loadingSuggestion ? 'Sugerindo...' : 'Sugerir Nome'}
                 </button>
               )}
