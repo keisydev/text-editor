@@ -1,5 +1,4 @@
-// client/src/pages/Home.jsx
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import CreateQuillModal from '../components/CreateQuillModal';
 import './Home.css'
 
@@ -16,10 +15,9 @@ const Home = () => {
         if (data.exists) {
             return { error: `O Quill '${quillName}' já existe. Por favor, escolha outro nome ou acesse-o.` };
         } else {
-            // *** MUDANÇA AQUI: Retorna o link para o modal ***
+            // Retorna o link para o modal ***
             const baseUrl = window.location.origin + '/text-editor'; 
-            const editorUrl = `${baseUrl}/#/edicao/${quillName}`;
-            // Não abre a aba aqui. O modal fará isso depois que o link for gerado.
+            const editorUrl = `${baseUrl}/#/editor/${quillName}`;
             return { success: true, link: editorUrl }; // Retorna o link
         }
     } catch (apiError) {

@@ -1,15 +1,14 @@
-// client/src/pages/AcessarEdicao.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import '../App.css'; 
 import './AcessarEdicao.css'; 
 
 const AcessarEdicao = () => {
   const [inputRoomName, setInputRoomName] = useState('');
-  const [error, setError] = useState(''); // Novo estado para mensagens de erro
+  const [error, setError] = useState(''); 
   const navigate = useNavigate();
 
-  const handleAccessRoom = async () => { // Função agora é assíncrona
+  const handleAccessRoom = async () => { 
     setError(''); // Limpa mensagens de erro anteriores
     if (inputRoomName.trim() === '') {
       setError('Por favor, digite um nome ou link de Quill.');
@@ -43,7 +42,7 @@ const AcessarEdicao = () => {
       console.log("Entrada não é uma URL válida. Usando o texto como nome de sala.");
     }
 
-    // *** MUDANÇA CRÍTICA AQUI: CHAMA O BACK-END PARA VERIFICAR ***
+    //  CHAMA O BACK-END PARA VERIFICAR 
     const renderApiBaseUrl = 'https://text-editor-j60f.onrender.com'; // Sua URL base do Render
     try {
         const response = await fetch(`${renderApiBaseUrl}/api/room-exists/${extractedRoomId}`);

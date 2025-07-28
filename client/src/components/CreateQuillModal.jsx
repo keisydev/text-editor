@@ -1,5 +1,4 @@
-// client/src/components/CreateQuillModal.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './CreateQuillModal.css'; 
 
 const CreateQuillModal = ({ onClose, onCreate }) => {
@@ -21,9 +20,8 @@ const CreateQuillModal = ({ onClose, onCreate }) => {
     if (result && result.error) {
       setError(result.error); 
       setGeneratedLink(''); // Garante que a tela de link não apareça no erro
-    } else if (result && result.success && result.link) { // *** MUDANÇA AQUI: Verifica 'result.link' ***
+    } else if (result && result.success && result.link) { // Verifica 'result.link' ***
       setGeneratedLink(result.link); // <<-- Usa o link retornado pela Home
-      // Nao chama onClose aqui ainda, permite que o usuario veja o link
     }
   };
 

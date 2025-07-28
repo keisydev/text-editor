@@ -1,22 +1,19 @@
-// server/index.js
-
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const Delta = require('quill-delta'); 
-const cors = require('cors'); // <<-- IMPORTANTE: Importe a biblioteca 'cors' aqui
+const cors = require('cors'); 
 
 const app = express();
 const server = http.createServer(app);
 
-// *** IMPORTANTE: APLICA O MIDDLEWARE CORS A TODAS AS ROTAS HTTP DO EXPRESS AQUI ***
-// Isso permite que seu front-end (mesmo em domínios diferentes, como localhost ou GitHub Pages)
+// APLICA O MIDDLEWARE CORS A TODAS AS ROTAS HTTP DO EXPRESS AQUI 
+//Permite que seu front-end (mesmo em domínios diferentes, como localhost ou GitHub Pages)
 // faça requisições GET/POST para as APIs REST do seu back-end.
 app.use(cors()); 
 
 
 // Configura o Socket.IO com a configuração de CORS
-// Esta configuração é ESPECÍFICA para a comunicação de WebSockets do Socket.IO
 const io = socketIo(server, {
   cors: {
     origin: "*", // Permite qualquer origem para as conexões de WebSocket
@@ -119,7 +116,7 @@ io.on('connection', (socket) => {
         console.log(`[Socket.IO] Cliente desconectado. ID: ${socket.id}`);
     });
 
-    // Opcional: Log para erros do Socket.IO (erros de comunicação)
+    // Log para erros do Socket.IO (erros de comunicação)
     socket.on('error', (error) => {
         console.error(`[Socket.IO Error] Erro no socket ${socket.id}:`, error);
     });
