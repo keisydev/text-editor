@@ -19,7 +19,7 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 4000;
 
-const MONGODB_URI = 'process.env.MONGODB_URI '; 
+const MONGODB_URI =process.env.MONGODB_URI; 
 
 
 // *** CONECTAR AO MONGODB ***
