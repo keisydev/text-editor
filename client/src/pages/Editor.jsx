@@ -1,27 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // <<-- Importe useNavigate
+import  { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; 
 import io from 'socket.io-client';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; 
 import '../App.css'; 
 import './Editor.css'; 
 import Delta from 'quill-delta'; 
-// import Quill from 'quill'; // <<-- NÃO PRECISA IMPORTAR SE NÃO FOR CONFIGURAR FONTES/TAMANHOS AVANÇADOS
 
 import jsPDF from 'jspdf'; 
 import html2canvas from 'html2canvas'; 
 
-// Conexão global do Socket.IO (reutilizada para evitar múltiplas conexões)
+
 const socket = io('https://text-editor-j60f.onrender.com'); 
 
-// --- REMOVIDO: Configuração de Fontes e Tamanhos Customizadas ---
-// Se você tinha este bloco fora da função, REMOVA-O.
-// Ex: const Font = Quill.import('formats/font'); etc.
 
 
 function Editor() {
   const { id } = useParams(); 
-  const navigate = useNavigate(); // Importe useNavigate para o delete
+  const navigate = useNavigate(); 
   
   const [charCount, setCharCount] = useState(0); 
   const quillRef = useRef(null); 
