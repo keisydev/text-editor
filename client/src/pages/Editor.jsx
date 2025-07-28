@@ -1,24 +1,33 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom'; 
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // <<-- Importe useNavigate
 import io from 'socket.io-client';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; 
 import '../App.css'; 
 import './Editor.css'; 
 import Delta from 'quill-delta'; 
+// import Quill from 'quill'; // <<-- NÃO PRECISA IMPORTAR SE NÃO FOR CONFIGURAR FONTES/TAMANHOS AVANÇADOS
 
 import jsPDF from 'jspdf'; 
 import html2canvas from 'html2canvas'; 
 
+// Conexão global do Socket.IO (reutilizada para evitar múltiplas conexões)
 const socket = io('https://text-editor-j60f.onrender.com'); 
+
+// --- REMOVIDO: Configuração de Fontes e Tamanhos Customizadas ---
+// Se você tinha este bloco fora da função, REMOVA-O.
+// Ex: const Font = Quill.import('formats/font'); etc.
+
 
 function Editor() {
   const { id } = useParams(); 
+  const navigate = useNavigate(); // Importe useNavigate para o delete
+  
   const [charCount, setCharCount] = useState(0); 
   const quillRef = useRef(null); 
   const socketRef = useRef(null); 
-  const [quillEditorInstanceReady, setQuillEditorInstanceReady] = useState(false); 
-  const [initialDeltaReceived, setInitialDeltaReceived] = useState(null); 
+  const [quillEditorInstanceReady, setQuillEditorInstanceReady] = useState(false); // Indica se a instância do Quill está pronta
+  const [initialDeltaReceived, setInitialDeltaReceived] = useState(null); // Estado para armazenar o delta inicial recebido
 
   // useEffect principal para configurar o Socket.IO e seus listeners
   // Este useEffect AGORA ASSUME que 'id' sempre estará presente
@@ -50,48 +59,55 @@ function Editor() {
       setCharCount(count);
     };
 
+    // Para quando a sala é deletada pelo servidor (do backend)
+    const handleRoomDeleted = () => {
+        alert(`O Quill '${id}' foi deletado por outro usuário.`);
+        navigate('/edicao'); // Redireciona para a página de acesso a edição
+    };
+
     socketRef.current.on('initial_document', handleInitialDocument); 
     socketRef.current.on('text_change', handleTextChange);           
     socketRef.current.on('update_char_count', handleUpdateCharCount);
+    socketRef.current.on('room_deleted', handleRoomDeleted); 
 
     return () => {
       console.log(`[Frontend] Limpando listeners e emitindo leave_room para sala: ${id}`);
       socketRef.current.off('initial_document', handleInitialDocument);
       socketRef.current.off('text_change', handleTextChange);
       socketRef.current.off('update_char_count', handleUpdateCharCount);
+      socketRef.current.off('room_deleted', handleRoomDeleted); // Remove o listener
       socketRef.current.emit('leave_room', id); 
     };
-  }, [id]); 
+  }, [id, navigate]); // Adicionado 'navigate' como dependência
 
 
-  // NOVO useEffect para detectar quando a instância do editor Quill está pronta e inicializá-la
+  // useEffect para detectar quando a instância do editor Quill está pronta e inicializá-la
   useEffect(() => {
-    // Isso é disparado quando quillRef.current (o componente ReactQuill) está montado
-    // E quando quillRef.current.getEditor() (a instância Quill subjacente) está disponível.
-    if (quillRef.current && quillRef.current.getEditor() && !quillEditorInstanceReady) {
+    // Só executa se a ref do Quill estiver disponível e a instância do editor Quill ainda não estiver marcada como pronta
+    // E se estamos em uma sala (ID não é undefined)
+    if (id && quillRef.current && quillRef.current.getEditor() && !quillEditorInstanceReady) { 
       const editor = quillRef.current.getEditor();
-      editor.setContents(new Delta([{ insert: '\n' }]), 'silent'); // Garante que começa limpo
+      editor.setContents(new Delta([{ insert: '\n' }]), 'silent'); 
       setCharCount(0);
       setQuillEditorInstanceReady(true); // Marca que a instância do editor Quill está pronta
       console.log("[Frontend] Instância do editor Quill totalmente inicializada e pronta.");
     }
-  }, [quillRef.current, quillEditorInstanceReady]); // Depende da ref e do estado
+  }, [id, quillRef.current, quillEditorInstanceReady]); 
 
 
   // useEffect para aplicar o Delta inicial APENAS QUANDO o Quill estiver TOTALMENTE pronto E o Delta foi recebido
   useEffect(() => {
-    if (quillEditorInstanceReady && initialDeltaReceived) { // Usa o NOVO ESTADO AQUI
+    if (quillEditorInstanceReady && initialDeltaReceived) { 
       const editor = quillRef.current.getEditor();
       editor.setContents(new Delta(initialDeltaReceived), 'silent'); 
       setCharCount(editor.getText().trim().length);
       console.log("[Frontend] Conteúdo inicial (armazenado) aplicado ao Quill.");
       setInitialDeltaReceived(null); 
     }
-  }, [initialDeltaReceived, quillEditorInstanceReady]); // Depende do Delta, e da prontidão da instância do editor
+  }, [initialDeltaReceived, quillEditorInstanceReady, quillRef.current]); 
 
 
-  const handleQuillChange = ( delta, source) => { 
-    // Só envia se a instância do editor estiver pronta e a mudança veio do usuário
+  const handleQuillChange = (content, delta, source) => { // 'content' é o HTML, 'delta' a mudança, 'source' de onde veio
     if (source === 'user' && id && socketRef.current && socketRef.current.connected && quillEditorInstanceReady) { 
       if (quillRef.current) { 
         const editor = quillRef.current.getEditor();
@@ -112,7 +128,6 @@ function Editor() {
   };
 
   const exportToPdf = () => {
-    // Só exporta se a instância do editor estiver pronta
     if (quillRef.current && quillEditorInstanceReady && id) { 
       const editorElement = quillRef.current.editor.scroll.domNode; 
       
@@ -147,6 +162,29 @@ function Editor() {
     } else {
       alert("Editor não está pronto ou sala não selecionada para exportar.");
     }
+  };
+
+  // Deletar Quill
+  const handleDeleteQuill = async () => {
+      if (window.confirm(`Tem certeza que deseja deletar o Quill '${id}'? Esta ação não pode ser desfeita.`)) {
+          const renderApiBaseUrl = 'https://text-editor-j60f.onrender.com'; 
+          try {
+              const response = await fetch(`${renderApiBaseUrl}/api/delete-room/${id}`, {
+                  method: 'DELETE',
+              });
+
+              if (response.ok) {
+                  alert(`O Quill '${id}' foi deletado com sucesso.`);
+                  navigate('/edicao'); // Redireciona para a página de acesso a edição
+              } else {
+                  const errorData = await response.json();
+                  alert(`Falha ao deletar o Quill: ${errorData.message || response.statusText}`);
+              }
+          } catch (apiError) {
+              console.error("Erro ao deletar Quill:", apiError);
+              alert("Erro de rede ao tentar deletar o Quill.");
+          }
+      }
   };
 
 
