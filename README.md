@@ -1,64 +1,77 @@
-# MyQuill - Editor de Texto Colaborativo em Tempo Real
+# MyQuill - Real-time Collaborative Text Editor
 
 <br>
 
-![Badge de Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue)
+![Badge de Status](https://img.shields.io/badge/Status-In%20Development-blue)
 ![Badge de Tecnologia](https://img.shields.io/badge/Tecnologia-React%20%7C%20Node.js%20%7C%20Socket.IO%20%7C%20Quill.js-orange)
 ![Badge de Deploy](https://img.shields.io/badge/Deploy-GitHub%20Pages%20%7C%20Render-blue)
+![Badge de Persistência](https://img.shields.io/badge/Persist%C3%AAncia-MongoDB%20Atlas-green)
 
 ---
 
-## 🔗 Links do Projeto
+## 🔗 Project Links
 
--   **Aplicação Online:** [Acesse o MyQuill Aqui](https://keisydev.github.io/text-editor)
--   **API (Back-end):** [Status da API](https://text-editor-j60f.onrender.com)
+-   **Live Application:** [Access MyQuill Here](https://keisydev.github.io/text-editor)
+-   **API (Back-end):** [API Status](https://text-editor-j60f.onrender.com)
 
 ---
 
-## 🚀 Sobre o Projeto
+## 🚀 About the Project
 
-Este projeto é um editor de texto colaborativo inspirado em ferramentas como o Framapad e o Google Docs. Seu principal objetivo é permitir que múltiplos usuários editem o mesmo documento em tempo real, com todas as alterações e formatações sendo instantaneamente sincronizadas entre os participantes.
+This project is a collaborative text editor inspired by tools like Framapad and Google Docs. Its main goal is to allow multiple users to edit the same document in real-time, with all changes and formatting being instantly synchronized among participants.
 
-O "MyQuill" foi desenvolvido como um projeto de portfólio para demonstrar habilidades avançadas em programação **Full-Stack**, comunicação em tempo real e construção de interfaces interativas.
+"MyQuill" was developed as a portfolio project to demonstrate advanced skills in **Full-Stack** programming, real-time communication, and interactive interface design.
 
-## ✨ Tecnologias Utilizadas
+## ✨ Technologies Used
 
 * **Front-end:**
-    * **React:** Biblioteca JavaScript robusta para construir interfaces de usuário dinâmicas.
-    * **Vite:** Ferramenta de build extremamente rápida, proporcionando um ambiente de desenvolvimento ágil.
-    * **React Router DOM:** Para gerenciar o roteamento entre as diferentes páginas da aplicação.
-    * **Quill.js:** Editor de texto rico de alto desempenho, utilizado para a edição e formatação avançada do conteúdo.
-    * **gh-pages:** Biblioteca para automatizar o processo de deploy da aplicação front-end no GitHub Pages.
-    * **Socket.IO-client:** Biblioteca para estabelecer e gerenciar a comunicação em tempo real com o servidor.
+    * **React:** A robust JavaScript library for building dynamic user interfaces.
+    * **Vite:** An extremely fast build tool, providing an agile development environment.
+    * **React Router DOM:** For managing routing between the application's different pages.
+    * **Quill.js:** A high-performance rich text editor used for advanced content editing and formatting.
+    * **jsPDF & html2canvas:** Libraries for the document export-to-PDF functionality.
+    * **gh-pages:** A library to automate the deployment process of the front-end application to GitHub Pages.
+    * **Socket.IO-client:** A library to establish and manage real-time communication with the server.
 
 * **Back-end:**
-    * **Node.js:** Ambiente de execução JavaScript para o servidor.
-    * **Express:** Framework web minimalista e flexível para construir a API.
-    * **Socket.IO:** Biblioteca para habilitar a comunicação bidirecional em tempo real (WebSockets) entre o servidor e os clientes.
-    * **Quill-Delta:** Biblioteca utilizada no servidor para manipular e compor os objetos Delta do Quill.js, garantindo a sincronização correta das edições.
+    * **Node.js:** A JavaScript runtime environment for the server.
+    * **Express:** A minimalist and flexible web framework for building the API.
+    * **Socket.IO:** A library to enable real-time bidirectional communication (WebSockets) between the server and clients.
+    * **Quill-Delta:** A library used on the server to manipulate and compose Quill.js Delta objects, ensuring correct synchronization of edits.
+    * **Mongoose:** A library for MongoDB object modeling, facilitating interaction with the database.
+    * **Cors:** A middleware for Node.js, enabling Cross-Origin Resource Sharing for HTTP requests between different origins.
 
-* **Deploy:**
-    * **GitHub Pages:** Hospeda a aplicação front-end estática, sendo ideal para demonstrar o projeto publicamente.
-    * **Render:** Hospeda o serviço de back-end em Node.js, fornecendo a infraestrutura necessária para o funcionamento contínuo do Socket.IO.
+* **Database:**
+    * **MongoDB Atlas:** A cloud-based NoSQL database service used to persist document data (Quills), ensuring no work is lost after the server shuts down.
 
-## 🛠️ Funcionalidades Implementadas
+* **Deployment:**
+    * **GitHub Pages:** Hosts the static front-end application, making it ideal for public project demonstrations.
+    * **Render:** Hosts the Node.js back-end service, providing the necessary infrastructure for continuous Socket.IO operation and communication with MongoDB.
 
--   **Edição Colaborativa em Tempo Real:** Múltiplos usuários podem digitar e formatar o texto simultaneamente, com as alterações aparecendo instantaneamente para todos.
--   **Criação de Quills (Salas Dinâmicas):** Os usuários podem criar novos documentos colaborativos com nomes únicos, gerando um link compartilhável para acesso direto à sala.
--   **Editor de Texto Rico (Rich Text Editor):** Suporte a formatação de texto (negrito, itálico, listas, etc.) através da integração do Quill.js.
--   **Contagem de Caracteres em Tempo Real:** Exibição dinâmica do número de caracteres do documento.
--   **Arquitetura Cliente-Servidor:** Demonstração completa da integração entre um front-end moderno (React) e um back-end (Node.js) para funcionalidades em tempo real.
--   **Deploy Integrado e Estratégico:** A aplicação é publicada utilizando diferentes plataformas (GitHub Pages para o front-end estático e Render para o back-end com WebSockets), refletindo uma prática robusta e eficiente para a hospedagem de aplicações completas.
+## 🛠️ Implemented Features
 
-## ⚙️ Como Rodar o Projeto Localmente
+-   **Real-time Collaborative Editing:** Multiple users can type and format text simultaneously, with changes appearing instantly for everyone.
+-   **Rich Text Editor (Quill.js):** Support for text formatting (bold, italics, lists, colors, etc.) through Quill.js integration.
+-   **Real-time Character Count:** Dynamic display of the number of characters in the document.
+-   **Data Persistence:** Documents are saved to and loaded from a MongoDB database, ensuring work is not lost.
+-   **Quill Creation (Dynamic Rooms):** Users can create new collaborative documents with unique names.
+    -   **Shareable Link Generation:** Direct links are generated for quick access and sharing of rooms.
+    -   **Name Suggestion:** If a Quill name already exists, the system suggests alternative names.
+-   **Access Existing Quills:** A dedicated page for accessing pre-created rooms, with existence validation.
+-   **Export to PDF:** Ability to export the editor's content as a downloadable PDF file.
+-   **Quill Deletion:** The user can delete an existing document, permanently removing it from the system.
+-   **Client-Server Architecture:** A complete demonstration of the integration between a modern front-end (React) and a back-end (Node.js) for real-time functionalities.
+-   **Strategic and Integrated Deployment:** The application is deployed using different platforms (GitHub Pages for the static front-end and Render for the WebSocket back-end), reflecting a robust and efficient practice for hosting full-stack applications.
 
-Para testar este projeto em sua máquina, siga os passos abaixo:
+## ⚙️ How to Run the Project Locally
 
-### Pré-requisitos
-Certifique-se de ter o **Node.js** e o **npm** instalados.
+To test this project on your machine, follow the steps below:
 
-### 1. Clone o Repositório
-Abra seu terminal e execute:
+### Prerequisites
+Make sure you have **Node.js** and **npm** installed.
+
+### 1. Clone the Repository
+Open your terminal and run:
 ```bash
 git clone [https://github.com/keisydev/text-editor.git](https://github.com/keisydev/text-editor.git)
 cd text-editor
